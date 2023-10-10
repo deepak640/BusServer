@@ -1,6 +1,10 @@
 const mongoose = require("mongoose")
 const dotenv = require("dotenv")
 dotenv.config({ path: "./.env" })
-mongoose.connect(process.env.DB, { useNewUrlParser: true }, function () {
-    console.log("Database connected")
-})
+mongoose.connect(process.env.D_B, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => {
+        console.log('Connected to MongoDB');
+    })
+    .catch((error) => {
+        console.log('Error connecting to MongoDB:', error.message);
+    });
