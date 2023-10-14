@@ -13,7 +13,6 @@ router.get('/', function (req, res, next) {
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, type } = req.body;
-    console.log(req.body)
     // Check if user already exists
     let existing = await User.findOne({ email });
     if (existing) {
@@ -26,7 +25,6 @@ router.post('/register', async (req, res) => {
 
     // Create new teacher
     const newUser = new User({ name, email, password: hashedPassword, type });
-    console.log(newUser)
     // Save teacher to database
     const user = await newUser.save();
 
