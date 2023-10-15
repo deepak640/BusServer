@@ -41,12 +41,21 @@ router.post('/register', async (req, res) => {
   }
 })
 
-router.get('/get', async(req, res) => {
-  try {
-    const userinfo = await User.find();
-    res.json(userinfo)
-  } catch (error) {
-    res.json(error)
+router.post('/Login', async (req, res) => {
+  const { email, password } = req.body;
+  let existing = await User.findOne({ email })
+  if (!existing) {
+    return res.status(401).json({ error: 'Invalid Email' });
   }
+  const isMatch = await bcrypt.compare(password, existing.password);
+  if (!isMatch) {
+    return res.status(401).json({ error: 'Invalid Password' });
+  }
+  JWT.sign({ id: existing._id }, process.env.USER_KEY, (err, token) => {
+    if (err) {
+      res.json({ error: "somthing went wrong" })
+    }
+    res.json({ auth: token })
+  })
 })
 module.exports = router;
