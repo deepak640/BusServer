@@ -12,7 +12,7 @@ router.get('/', function (req, res, next) {
 
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, type } = req.body;
+    const { name, email, password, type, position, phone, licence, company } = req.body;
     // Check if user already exists
     let existing = await User.findOne({ email });
     if (existing) {
@@ -22,9 +22,23 @@ router.post('/register', async (req, res) => {
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create new teacher
-    const newUser = new User({ name, email, password: hashedPassword, type });
+    let newUser
+    // Create new user
+    switch (type) {
+      case 'RTO':
+        newUser = new User({ name, position, email, phone, licence, password: hashedPassword, type })
+        console.log("RTO")
+        break;
+      case 'manager':
+        console.log("manager")
+        newUser = new User({ name, email, phone, licence, company, password: hashedPassword, type })
+        break;
+      case 'general':
+        console.log("general")
+        newUser = new User({ name, email, phone, password: hashedPassword, type })
+      default:
+        break;
+    }
     // Save teacher to database
     const user = await newUser.save();
 

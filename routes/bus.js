@@ -19,8 +19,9 @@ router.post('/busDetails', async (req, res) => {
 });
 
 router.get('/busDetails', async (req, res) => {
+    const { stop,from } = req.body
     try {
-        const busDetails = await BusDetail.find();
+        const busDetails = await BusDetail.find({ from:from, stop: stop });
         res.json(busDetails);
     } catch (error) {
         res.status(500).json({ error: 'Error fetching bus details.' });
