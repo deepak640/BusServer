@@ -9,6 +9,10 @@ const busDetailsSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    from: {
+        type: String,
+        required: true,
+    },
     availability: {
         type: String,
         required: true,
