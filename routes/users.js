@@ -59,11 +59,11 @@ router.post('/Login', async (req, res) => {
   const { email, password } = req.body;
   let existing = await User.findOne({ email })
   if (!existing) {
-    return res.status(401).json({ error: 'Invalid Email' });
+    return res.status(401).json({ error: 'Invalid Credentials' });
   }
   const isMatch = await bcrypt.compare(password, existing.password);
   if (!isMatch) {
-    return res.status(401).json({ error: 'Invalid Password' });
+    return res.status(401).json({ error: 'Invalid Credentials' });
   }
   JWT.sign({ id: existing._id }, process.env.USER_KEY, (err, token) => {
     if (err) {
