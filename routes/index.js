@@ -3,7 +3,7 @@ var router = express.Router();
 const User = require('../Model/User');
 const JWT = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
-
+const bcrypt = require('bcryptjs')
 /* GET home page. */
 router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
@@ -52,10 +52,13 @@ router.post('/sendpasswordlink', async (req, res) => {
   if (!Email) {
     res.status(401).json({ message: "Enter Your Email" })
   }
+  const user = await User.findOne({ email: Email })
+  console.log("🚀 ~ file: index.js:56 ~ router.post ~ user:", user)
   try {
-    const user = await User.findOne({ email: Email })
-    if (user) {
-      const token = JWT.sign({ id: (user._id) }, process.env.USER_KEY, { expiresIn: '120s' })
+    if (!user) {
+      return res.status(400).json({message : "User not registered"})
+    } else {
+      const token = JWT.sign({ id: (user._id) }, process.env.USER_KEY, { expiresIn: '240s' })
       if (token) {
         const transporter = nodemailer.createTransport({
           host: "smtp.gmail.com",
@@ -92,40 +95,30 @@ router.post('/sendpasswordlink', async (req, res) => {
   }
 })
 
-router.get('/forgotpassword/:token', async (req, res) => {
-  const { token } = req.params
-  try {
-    const decodedToken = JWT.verify(token, process.env.USER_KEY);
-    const userId = decodedToken.id;
-    const user = await User.findOne({ _id: userId })
-    if (user) {
-      res.status(200).json(user)
-    } else {
-      res.status(401).json({ error: "user not exist" })
-    }
-  } catch (error) {
-    console.log(error)
-  }
-})
 
 router.post('/:token', async (req, res) => {
   const { Password } = req.body;
+  console.log("🚀 ~ file: index.js:101 ~ router.post ~ Password:", Password)
   const { token } = req.params;
 
   try {
-    const decodedToken = jwt.verify(token, process.env.USER_KEY);
+    const decodedToken = JWT.verify(token, process.env.USER_KEY);
     const userId = decodedToken.id;
 
-    // Find user in the Teacher collection
     let user = await User.findOne({ _id: userId });
-
+    if (!user) {
+      return res.status(400).json({message:"User not exist"})
+    }
     const encryptedPass = await bcrypt.hash(Password, 10);
-    const updatedUser = await user.findByIdAndUpdate({ _id: userId }, { password: encryptedPass });
+    const updatedUser = await User.findByIdAndUpdate({ _id: userId }, { password: encryptedPass });
+    console.log("🚀 ~ file: index.js:113 ~ router.post ~ updatedUser:", updatedUser)
 
     if (updatedUser) {
-      res.json({ message: 'Password changed for' });
+      res.json({ message: 'Password changed' });
+      console.log("changed")
     } else {
       res.json({ error: "Failed to update password" });
+      console.log("error")
     }
   } catch (error) {
     console.log(error);
